@@ -15,3 +15,4 @@ Usuario inicial del seed: `admin` / `Admin123!`. Cámbialo antes de cualquier de
 
 ## Nota
 Base funcional educativa, no certificada para producción. Antes de producción agregar pruebas automatizadas, rate limiting, política robusta de sesiones, gestión de secretos, backups/restauración probados, monitoreo y revisión de concurrencia en pagos.
+# Shawarma
