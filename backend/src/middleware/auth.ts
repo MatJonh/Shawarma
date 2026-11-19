@@ -1,0 +1,4 @@
+import {Request,Response,NextFunction} from "express"; import jwt from "jsonwebtoken";
+declare global { namespace Express { interface Request { user?: {id:number;username:string;roles:string[]} } } }
+export function auth(req:Request,res:Response,next:NextFunction){const h=req.headers.authorization;if(!h?.startsWith("Bearer "))return res.status(401).json({error:"Autenticación requerida"});try{req.user=jwt.verify(h.slice(7),process.env.JWT_SECRET!) as any;next()}catch{return res.status(401).json({error:"Token inválido o vencido"})}}
+export function roles(...allowed:string[]){return (req:Request,res:Response,next:NextFunction)=>{if(!req.user)return res.status(401).json({error:"Autenticación requerida"});if(!req.user.roles.some(r=>allowed.includes(r)))return res.status(403).json({error:"Permisos insuficientes"});next()}}

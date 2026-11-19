@@ -1,0 +1,321 @@
+openapi: 3.0.3
+ent:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: El usuario no tiene el rol requerido.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }info:
+  title: Restaurante Shawarma API
+  version: 1.0.0
+  description: |
+    Documentación inicial basada en las rutas cuyo código fue compartido y revisado.
+    Incluye autenticación, usuarios y pagos. Los contratos de productos, categorías,
+    pedidos, entregas, reportes, incidentes y auditoría aún deben verificarse.
+servers:
+  - url: http://localhost:4000
+    description: Servidor local
+tags:
+  - name: Autenticación
+  - name: Usuarios
+  - name: Pagos
+
+paths:
+  /api/auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, minLength: 1 }
+                password: { type: string, minLength: 1 }
+            example:
+              username: admin
+              password: Admin123!
+      responses:
+        '200':
+          description: Inicio de sesión exitoso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string, description: JWT }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      username: { type: string }
+                      fullName: { type: string }
+                      roles:
+                        type: array
+                        items: { type: string }
+        '401':
+          description: Credenciales incorrectas o usuario inactivo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '400':
+          description: Datos inválidos.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/me:
+    get:
+      tags: [Autenticación]
+      summary: Consultar usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Datos básicos del usuario autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  username: { type: string }
+                  fullName: { type: string }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/users:
+    get:
+      tags: [Usuarios]
+      summary: Listar usuarios
+      description: Requiere autenticación y rol ADMIN.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios sin contraseñas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    fullName: { type: string }
+                    username: { type: string }
+                    isActive: { type: boolean }
+                    createdAt: { type: string, format: date-time }
+                    roles:
+                      type: array
+                      items: { type: string }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Usuarios]
+      summary: Crear usuario
+      description: Requiere ADMIN. roleCode debe existir; si se omite, el backend usa CASHIER.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, username, password]
+              properties:
+                fullName: { type: string, minLength: 2 }
+                username: { type: string, minLength: 3 }
+                password: { type: string, minLength: 8, writeOnly: true }
+                roleCode: { type: string, default: CASHIER }
+            example:
+              fullName: Carlos Mendoza
+              username: carlos
+              password: Carlos123!
+              roleCode: CASHIER
+      responses:
+        '201':
+          description: Usuario creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  fullName: { type: string }
+                  username: { type: string }
+                  isActive: { type: boolean }
+        '400':
+          description: Datos inválidos o rol desconocido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/users/{id}/active:
+    patch:
+      tags: [Usuarios]
+      summary: Activar o desactivar usuario
+      description: Requiere ADMIN. Un administrador no puede desactivar su propia cuenta.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isActive]
+              properties:
+                isActive: { type: boolean }
+            examples:
+              desactivar:
+                value: { isActive: false }
+              activar:
+                value: { isActive: true }
+      responses:
+        '200':
+          description: Estado actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  username: { type: string }
+                  isActive: { type: boolean }
+        '400':
+          description: Datos inválidos o intento de desactivar la propia cuenta.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/payments:
+    get:
+      tags: [Pagos]
+      summary: Listar pagos
+      description: Requiere ADMIN o CASHIER. Devuelve hasta los 200 pagos más recientes, con pedido y nombre del registrador.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de pagos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Pagos]
+      summary: Registrar pago
+      description: Requiere ADMIN o CASHIER. No admite pedidos CANCELLED o DELIVERED ni pagos superiores al saldo pendiente.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, method, amount]
+              properties:
+                orderId: { type: integer, minimum: 1 }
+                method:
+                  type: string
+                  enum: [CASH, ELECTRONIC]
+                amount: { type: number, exclusiveMinimum: 0 }
+                referenceNote: { type: string }
+            example:
+              orderId: 15
+              method: CASH
+              amount: 75.5
+              referenceNote: Pago en efectivo
+      responses:
+        '201':
+          description: Pago registrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Datos inválidos, pedido no encontrado, pedido finalizado o importe superior al saldo pendiente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/payments/{id}/void:
+    patch:
+      tags: [Pagos]
+      summary: Anular pago
+      description: Requiere ADMIN. Cambia el estado del pago a VOIDED.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Pago anulado.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Token ausente, inválido o expirado.
+      cont
+
+const ui = SwaggerUIBundle({
+    url: "./swagger.yaml",
+    dom_id: "#swagger-ui"
+});

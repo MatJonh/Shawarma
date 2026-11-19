@@ -1,0 +1,4 @@
+import {Router} from "express";import {z} from "zod";import {prisma} from "../../config/prisma";import {auth,roles} from "../../middleware/auth";const r=Router();
+r.get("/",async(_q,res,next)=>{try{res.json(await prisma.category.findMany({where:{isActive:true},include:{_count:{select:{products:true}}},orderBy:{name:"asc"}}))}catch(e){next(e)}});
+r.post("/",auth,roles("ADMIN"),async(req,res,next)=>{try{const d=z.object({name:z.string().min(2),description:z.string().optional()}).parse(req.body);res.status(201).json(await prisma.category.create({data:d}))}catch(e){next(e)}});
+r.patch("/:id",auth,roles("ADMIN"),async(req,res,next)=>{try{const d=z.object({name:z.string().min(2).optional(),description:z.string().optional(),isActive:z.boolean().optional()}).parse(req.body);res.json(await prisma.category.update({where:{id:Number(req.params.id)},data:d}))}catch(e){next(e)}});export default r;

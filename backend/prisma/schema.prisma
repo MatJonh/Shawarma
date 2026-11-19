@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int                  @id @default(autoincrement())
+  fullName     String               @map("full_name") @db.VarChar(120)
+  username     String               @unique @db.VarChar(60)
+  passwordHash String               @map("password_hash")
+  isActive     Boolean              @default(true) @map("is_active")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  audit        AuditLog[]
+  orders       Order[]              @relation("OrderCreator")
+  deliveries   Delivery[]
+  changes      OrderStatusHistory[]
+  payments     Payment[]            @relation("PaymentRecorder")
+  incidents    PaymentIncident[]    @relation("Reporter")
+  roles        UserRole[]
+
+  @@map("app_user")
+}
+
+model Role {
+  id    Int        @id @default(autoincrement())
+  code  String     @unique @db.VarChar(30)
+  name  String     @unique @db.VarChar(80)
+  users UserRole[]
+
+  @@map("app_role")
+}
+
+model UserRole {
+  userId Int  @map("user_id")
+  roleId Int  @map("role_id")
+  role   Role @relation(fields: [roleId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_role")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(80)
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  products    Product[]
+
+  @@map("product_category")
+}
+
+model Product {
+  id           Int         @id @default(autoincrement())
+  categoryId   Int         @map("category_id")
+  name         String      @db.VarChar(120)
+  description  String?
+  currentPrice Decimal     @map("current_price") @db.Decimal(10, 2)
+  isAvailable  Boolean     @default(true) @map("is_available")
+  isActive     Boolean     @default(true) @map("is_active")
+  items        OrderItem[]
+  category     Category    @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, name])
+  @@map("product")
+}
+
+model Order {
+  id                 Int                  @id @default(autoincrement())
+  orderNumber        Int                  @unique @default(autoincrement()) @map("order_number")
+  mode               OrderMode
+  status             OrderStatus          @default(REGISTERED)
+  createdById        Int                  @map("created_by")
+  notes              String?
+  cancellationReason String?              @map("cancellation_reason")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  creator            User                 @relation("OrderCreator", fields: [createdById], references: [id])
+  delivery           Delivery?
+  items              OrderItem[]
+  history            OrderStatusHistory[]
+  payments           Payment[]
+  incidents          PaymentIncident[]
+
+  @@map("customer_order")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement()) @map("order_item_id")
+  orderId   Int     @map("order_id")
+  productId Int     @map("product_id")
+  quantity  Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  notes     String? @map("item_notes")
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_item")
+}
+
+model OrderStatusHistory {
+  id          Int          @id @default(autoincrement()) @map("status_history_id")
+  orderId     Int          @map("order_id")
+  oldStatus   OrderStatus? @map("old_status_code")
+  newStatus   OrderStatus  @map("new_status_code")
+  changedById Int          @map("changed_by")
+  changedAt   DateTime     @default(now()) @map("changed_at")
+  comment     String?
+  changedBy   User         @relation(fields: [changedById], references: [id])
+  order       Order        @relation(fields: [orderId], references: [id])
+
+  @@map("order_status_history")
+}
+
+model Payment {
+  id            Int               @id @default(autoincrement()) @map("payment_id")
+  orderId       Int               @map("order_id")
+  method        PayMethod         @map("method_code")
+  status        PayStatus         @default(RECORDED) @map("payment_status_code")
+  amount        Decimal           @db.Decimal(10, 2)
+  recordedById  Int               @map("recorded_by")
+  recordedAt    DateTime          @default(now()) @map("recorded_at")
+  referenceNote String?           @map("reference_note")
+  order         Order             @relation(fields: [orderId], references: [id])
+  recorder      User              @relation("PaymentRecorder", fields: [recordedById], references: [id])
+  incidents     PaymentIncident[]
+
+  @@map("payment")
+}
+
+model PaymentIncident {
+  id              Int            @id @default(autoincrement()) @map("incident_id")
+  paymentId       Int?           @map("payment_id")
+  orderId         Int            @map("order_id")
+  reportedById    Int            @map("reported_by")
+  incidentType    String         @map("incident_type")
+  description     String
+  status          IncidentStatus @default(OPEN) @map("incident_status")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  resolvedAt      DateTime?      @map("resolved_at")
+  resolutionNotes String?        @map("resolution_notes")
+  order           Order          @relation(fields: [orderId], references: [id])
+  payment         Payment?       @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  reporter        User           @relation("Reporter", fields: [reportedById], references: [id])
+
+  @@map("payment_incident")
+}
+
+model Delivery {
+  id            Int      @id @default(autoincrement()) @map("delivery_id")
+  orderId       Int      @unique @map("order_id")
+  deliveredById Int      @map("delivered_by")
+  deliveredAt   DateTime @default(now()) @map("delivered_at")
+  notes         String?
+  deliveredBy   User     @relation(fields: [deliveredById], references: [id])
+  order         Order    @relation(fields: [orderId], references: [id])
+
+  @@map("delivery")
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement()) @map("audit_id")
+  userId     Int?     @map("user_id")
+  actionCode String   @map("action_code")
+  entityName String   @map("entity_name")
+  entityId   String?  @map("entity_id")
+  occurredAt DateTime @default(now()) @map("occurred_at")
+  details    Json?
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_log")
+}
+
+enum OrderMode {
+  DINE_IN
+  TAKEAWAY
+}
+
+enum OrderStatus {
+  REGISTERED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum PayMethod {
+  CASH
+  ELECTRONIC
+}
+
+enum PayStatus {
+  RECORDED
+  VOIDED
+  INCIDENT
+}
+
+enum IncidentStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+}

@@ -1,0 +1,1 @@
+import {prisma} from "../../config/prisma"; export async function audit(userId:number|undefined,actionCode:string,entityName:string,entityId?:string,details?:object){await prisma.auditLog.create({data:{userId,actionCode,entityName,entityId,details:details as any}}).catch(console.error)}
