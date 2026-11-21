@@ -4,6 +4,7 @@ trigger:
     include:
       - main
 
+# Agente predeterminado para CI
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -27,11 +28,12 @@ resources:
         --health-timeout 3s
         --health-retries 10
 
-# ==========================================
-# TRABAJO PRINCIPAL DE INTEGRACION CONTINUA
-# ==========================================
-
 jobs:
+
+  # ==========================================
+  # JOB 1 - INTEGRACION CONTINUA
+  # ==========================================
+
   - job: CI
     displayName: 'CI - Restaurante Shawarma'
 
@@ -60,26 +62,18 @@ jobs:
       # 2. FRONTEND - REACT + VITE + VITEST
       # ==========================================
 
-      # Instalar dependencias
-
       - script: npm ci
         workingDirectory: frontend
         displayName: 'Frontend - Instalar dependencias'
-
-      # Verificar versiones instaladas
 
       - script: |
           npm ls vite vitest @vitest/coverage-v8 jsdom
         workingDirectory: frontend
         displayName: 'Frontend - Verificar dependencias'
 
-      # Ejecutar pruebas y cobertura
-
       - script: npm run test:ci
         workingDirectory: frontend
         displayName: 'Frontend - Ejecutar pruebas y cobertura'
-
-      # Publicar resultados JUnit
 
       - task: PublishTestResults@2
         displayName: 'Frontend - Publicar resultados de pruebas'
@@ -91,8 +85,6 @@ jobs:
           failTaskOnFailedTests: true
           testRunTitle: 'Pruebas Frontend - Shawarma'
 
-      # Publicar cobertura
-
       - task: PublishCodeCoverageResults@2
         displayName: 'Frontend - Publicar cobertura'
         condition: succeededOrFailed()
@@ -101,8 +93,6 @@ jobs:
           summaryFileLocation: '$(Build.SourcesDirectory)/frontend/coverage/cobertura-coverage.xml'
           pathToSources: '$(Build.SourcesDirectory)/frontend'
           failIfCoverageEmpty: true
-
-      # Construir aplicación
 
       - script: npm run build
         workingDirectory: frontend
@@ -113,13 +103,9 @@ jobs:
       # 3. BACKEND - NODE.JS + PRISMA + POSTGRESQL
       # ==========================================
 
-      # Instalar dependencias
-
       - script: npm ci
         workingDirectory: backend
         displayName: 'Backend - Instalar dependencias'
-
-      # Generar cliente Prisma
 
       - script: npx prisma generate
         workingDirectory: backend
@@ -127,23 +113,17 @@ jobs:
         env:
           DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
 
-      # Aplicar migraciones
-
       - script: npx prisma migrate deploy
         workingDirectory: backend
         displayName: 'Backend - Aplicar migraciones'
         env:
           DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
 
-      # Ejecutar pruebas unitarias e integración
-
       - script: npm run test:coverage
         workingDirectory: backend
         displayName: 'Backend - Ejecutar pruebas y cobertura'
         env:
           DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
-
-      # Publicar resultados JUnit
 
       - task: PublishTestResults@2
         displayName: 'Backend - Publicar resultados de pruebas'
@@ -155,8 +135,6 @@ jobs:
           failTaskOnFailedTests: true
           testRunTitle: 'Pruebas Backend - Shawarma'
 
-      # Publicar cobertura
-
       - task: PublishCodeCoverageResults@2
         displayName: 'Backend - Publicar cobertura'
         condition: succeededOrFailed()
@@ -166,10 +144,150 @@ jobs:
           pathToSources: '$(Build.SourcesDirectory)/backend'
           failIfCoverageEmpty: true
 
-      # Construir Backend
-
       - script: npm run build
         workingDirectory: backend
         displayName: 'Backend - Construir aplicación'
         env:
           DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
+
+
+      # ==========================================
+      # 4. PUBLICAR ARTEFACTOS LCOV
+      # ==========================================
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publicar LCOV Frontend'
+        inputs:
+          targetPath: '$(Build.SourcesDirectory)/frontend/coverage'
+          artifact: 'frontend-coverage'
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publicar LCOV Backend'
+        inputs:
+          targetPath: '$(Build.SourcesDirectory)/backend/coverage'
+          artifact: 'backend-coverage'
+
+
+  # ==========================================
+  # JOB 2 - ANALISIS ESTATICO SONARQUBE
+  # ==========================================
+
+  - job: SonarQube
+    displayName: 'SonarQube - Análisis de calidad'
+
+    dependsOn: CI
+
+    # Agente autohospedado Windows
+    pool:
+      name: 'Agente-Shawarma'
+
+    steps:
+
+      # ==========================================
+      # 1. OBTENER CODIGO FUENTE
+      # ==========================================
+
+      - checkout: self
+        fetchDepth: 0
+        displayName: 'Obtener código fuente'
+
+
+      # ==========================================
+      # 2. DESCARGAR COBERTURA FRONTEND
+      # ==========================================
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Descargar cobertura Frontend'
+        inputs:
+          artifact: 'frontend-coverage'
+          path: '$(Build.SourcesDirectory)/frontend/coverage'
+
+
+      # ==========================================
+      # 3. DESCARGAR COBERTURA BACKEND
+      # ==========================================
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Descargar cobertura Backend'
+        inputs:
+          artifact: 'backend-coverage'
+          path: '$(Build.SourcesDirectory)/backend/coverage'
+
+
+      # ==========================================
+      # 4. VERIFICAR REPORTES LCOV
+      # ==========================================
+
+      - powershell: |
+          Write-Host "======================================"
+          Write-Host "VERIFICANDO REPORTES DE COBERTURA"
+          Write-Host "======================================"
+
+          $frontend = "$(Build.SourcesDirectory)/frontend/coverage/lcov.info"
+          $backend = "$(Build.SourcesDirectory)/backend/coverage/lcov.info"
+
+          if (!(Test-Path $frontend)) {
+              throw "No se encontró el reporte LCOV del frontend: $frontend"
+          }
+
+          if (!(Test-Path $backend)) {
+              throw "No se encontró el reporte LCOV del backend: $backend"
+          }
+
+          Write-Host "LCOV Frontend encontrado."
+          Write-Host "LCOV Backend encontrado."
+          Write-Host "Ambos reportes están disponibles."
+        displayName: 'Verificar reportes de cobertura'
+
+
+      # ==========================================
+      # 5. VERIFICAR CONEXION SONARQUBE
+      # ==========================================
+
+      - powershell: |
+          Write-Host "Verificando conexión con SonarQube..."
+
+          try {
+              $response = Invoke-WebRequest `
+                -Uri "http://localhost:9000/api/system/status" `
+                -UseBasicParsing `
+                -TimeoutSec 15
+
+              Write-Host "Respuesta del servidor SonarQube:"
+              Write-Host $response.Content
+          }
+          catch {
+              throw "No se puede acceder a SonarQube en localhost:9000. Verifica que Docker esté activo y que el agente esté ejecutándose en el mismo equipo."
+          }
+        displayName: 'Verificar servidor SonarQube'
+
+
+      # ==========================================
+      # 6. PREPARAR ANALISIS SONARQUBE
+      # ==========================================
+
+      - task: SonarQubePrepare@8
+        displayName: 'SonarQube - Preparar análisis'
+        inputs:
+          SonarQube: 'SonarQube-Shawarma'
+          scannerMode: 'cli'
+          configMode: 'file'
+          configFile: 'sonar-project.properties'
+
+
+      # ==========================================
+      # 7. EJECUTAR ANALISIS ESTATICO
+      # ==========================================
+
+      - task: SonarQubeAnalyze@8
+        displayName: 'SonarQube - Analizar código'
+
+
+      # ==========================================
+      # 8. PUBLICAR QUALITY GATE
+      # ==========================================
+
+      - task: SonarQubePublish@8
+        displayName: 'SonarQube - Publicar Quality Gate'
+        inputs:
+          pollingTimeoutSec: '300'

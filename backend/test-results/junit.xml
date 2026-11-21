@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="10" failures="0" errors="0" time="0.0457621">
-    <testsuite name="src/config/database.integration.test.ts" timestamp="2026-11-21T03:51:27.653Z" hostname="MATT_INDUSTRIES" tests="3" failures="0" errors="0" skipped="0" time="0.040698">
-        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe conectarse correctamente a PostgreSQL" time="0.0263578">
+<testsuites name="vitest tests" tests="10" failures="0" errors="0" time="0.1836728">
+    <testsuite name="src/config/database.integration.test.ts" timestamp="2026-11-21T07:33:36.746Z" hostname="MATT_INDUSTRIES" tests="3" failures="0" errors="0" skipped="0" time="0.1786058">
+        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe conectarse correctamente a PostgreSQL" time="0.1308185">
         </testcase>
-        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe consultar la tabla de usuarios" time="0.0067754">
+        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe consultar la tabla de usuarios" time="0.0416597">
         </testcase>
-        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe consultar la tabla de productos" time="0.0046419">
+        <testcase classname="src/config/database.integration.test.ts" name="Integración con PostgreSQL &gt; debe consultar la tabla de productos" time="0.0031203">
         </testcase>
     </testsuite>
-    <testsuite name="src/modules/payments/payment.utils.test.ts" timestamp="2026-11-21T03:51:27.655Z" hostname="MATT_INDUSTRIES" tests="7" failures="0" errors="0" skipped="0" time="0.0050641">
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe calcular correctamente el saldo pendiente" time="0.0019703">
+    <testsuite name="src/modules/payments/payment.utils.test.ts" timestamp="2026-11-21T07:33:36.747Z" hostname="MATT_INDUSTRIES" tests="7" failures="0" errors="0" skipped="0" time="0.005067">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe calcular correctamente el saldo pendiente" time="0.0020048">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe devolver cero cuando el pedido está pagado" time="0.000156">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe devolver cero cuando el pedido está pagado" time="0.0001666">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe devolver el total cuando no existen pagos" time="0.0001199">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe devolver el total cuando no existen pagos" time="0.0001111">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe rechazar valores negativos" time="0.0008172">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe rechazar valores negativos" time="0.0008114">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe rechazar pagos superiores al total" time="0.000187">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe rechazar pagos superiores al total" time="0.0001848">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe redondear el saldo a dos decimales" time="0.0001039">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe redondear el saldo a dos decimales" time="0.0001006">
         </testcase>
-        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe permitir un pago igual a cero con decimales" time="0.000102">
+        <testcase classname="src/modules/payments/payment.utils.test.ts" name="calculateBalance &gt; debe permitir un pago igual a cero con decimales" time="0.0000929">
         </testcase>
     </testsuite>
 </testsuites>

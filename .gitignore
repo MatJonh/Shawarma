@@ -4,3 +4,8 @@ coverage/
 .env
 *.log
 .DS_Store
+
+# Respaldos de SonarQube
+sonarqube-backup.tar.gz
+*.tar.gzsonarqube-backup.tar.gz
+sonarqube-backup.tar.gz
