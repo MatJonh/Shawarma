@@ -179,7 +179,7 @@ jobs:
 
     # Agente autohospedado Windows
     pool:
-      name: 'Agente-Shawarma'
+      name: 'default'
 
     steps:
 
