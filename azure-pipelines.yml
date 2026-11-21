@@ -1,3 +1,4 @@
+
 trigger:
   branches:
     include:
@@ -45,21 +46,40 @@ jobs:
 
       - task: NodeTool@0
         inputs:
-          versionSpec: '20.x'
-        displayName: 'Instalar Node.js 20'
+          versionSpec: '22.x'
+        displayName: 'Instalar Node.js 22'
+
+      - script: |
+          echo "========== VERSIONES =========="
+          node --version
+          npm --version
+        displayName: 'Verificar entorno Node.js'
 
 
       # ==========================================
       # 2. FRONTEND - REACT + VITE + VITEST
       # ==========================================
 
+      # Instalar dependencias
+
       - script: npm ci
         workingDirectory: frontend
         displayName: 'Frontend - Instalar dependencias'
 
+      # Verificar versiones instaladas
+
+      - script: |
+          npm ls vite vitest @vitest/coverage-v8 jsdom
+        workingDirectory: frontend
+        displayName: 'Frontend - Verificar dependencias'
+
+      # Ejecutar pruebas y cobertura
+
       - script: npm run test:ci
         workingDirectory: frontend
         displayName: 'Frontend - Ejecutar pruebas y cobertura'
+
+      # Publicar resultados JUnit
 
       - task: PublishTestResults@2
         displayName: 'Frontend - Publicar resultados de pruebas'
@@ -71,13 +91,18 @@ jobs:
           failTaskOnFailedTests: true
           testRunTitle: 'Pruebas Frontend - Shawarma'
 
+      # Publicar cobertura
+
       - task: PublishCodeCoverageResults@2
         displayName: 'Frontend - Publicar cobertura'
         condition: succeededOrFailed()
         inputs:
+          codeCoverageTool: 'Cobertura'
           summaryFileLocation: '$(Build.SourcesDirectory)/frontend/coverage/cobertura-coverage.xml'
           pathToSources: '$(Build.SourcesDirectory)/frontend'
           failIfCoverageEmpty: true
+
+      # Construir aplicación
 
       - script: npm run build
         workingDirectory: frontend
@@ -87,6 +112,8 @@ jobs:
       # ==========================================
       # 3. BACKEND - NODE.JS + PRISMA + POSTGRESQL
       # ==========================================
+
+      # Instalar dependencias
 
       - script: npm ci
         workingDirectory: backend
@@ -98,15 +125,15 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Generar cliente Prisma'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
 
-      # Aplicar migraciones a PostgreSQL
+      # Aplicar migraciones
 
       - script: npx prisma migrate deploy
         workingDirectory: backend
         displayName: 'Backend - Aplicar migraciones'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
 
       # Ejecutar pruebas unitarias e integración
 
@@ -114,9 +141,9 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Ejecutar pruebas y cobertura'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
 
-      # Publicar resultados de pruebas
+      # Publicar resultados JUnit
 
       - task: PublishTestResults@2
         displayName: 'Backend - Publicar resultados de pruebas'
@@ -134,14 +161,15 @@ jobs:
         displayName: 'Backend - Publicar cobertura'
         condition: succeededOrFailed()
         inputs:
+          codeCoverageTool: 'Cobertura'
           summaryFileLocation: '$(Build.SourcesDirectory)/backend/coverage/cobertura-coverage.xml'
           pathToSources: '$(Build.SourcesDirectory)/backend'
           failIfCoverageEmpty: true
 
-      # Construir backend
+      # Construir Backend
 
       - script: npm run build
         workingDirectory: backend
         displayName: 'Backend - Construir aplicación'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
