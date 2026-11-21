@@ -1,0 +1,127 @@
+﻿├── .vscode
+│   └── settings.json
+├── backend
+│   ├── coverage
+│   │   ├── src
+│   │   │   ├── config
+│   │   │   ├── middleware
+│   │   │   ├── modules
+│   │   │   ├── app.ts.html
+│   │   │   └── index.html
+│   │   ├── base.css
+│   │   ├── block-navigation.js
+│   │   ├── cobertura-coverage.xml
+│   │   ├── favicon.png
+│   │   ├── index.html
+│   │   ├── prettify.css
+│   │   ├── prettify.js
+│   │   ├── readex-pro.woff2
+│   │   ├── readex-pro-license.txt
+│   │   ├── sort-arrow-sprite.png
+│   │   ├── sorter.js
+│   │   └── theme.js
+│   ├── prisma
+│   │   ├── migrations
+│   │   │   ├── 20261024075212_init
+│   │   │   └── migration_lock.toml
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   ├── src
+│   │   ├── config
+│   │   │   ├── database.integration.test.ts
+│   │   │   └── prisma.ts
+│   │   ├── middleware
+│   │   │   └── auth.ts
+│   │   ├── modules
+│   │   │   ├── audit
+│   │   │   ├── auth
+│   │   │   ├── categories
+│   │   │   ├── deliveries
+│   │   │   ├── incidents
+│   │   │   ├── orders
+│   │   │   ├── payments
+│   │   │   ├── products
+│   │   │   ├── reports
+│   │   │   └── users
+│   │   ├── app.ts
+│   │   └── server.ts
+│   ├── test-results
+│   │   └── junit.xml
+│   ├── .env
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   └── vitest.config.ts
+├── docs
+│   ├── uml
+│   │   └── .gitkeep
+│   ├── arquitectura.md
+│   ├── manual-instalacion.md
+│   ├── manual-usuario.md
+│   ├── pruebas.md
+│   └── requisitos.md
+├── frontend
+│   ├── coverage
+│   │   ├── api.ts.html
+│   │   ├── base.css
+│   │   ├── block-navigation.js
+│   │   ├── cobertura-coverage.xml
+│   │   ├── favicon.png
+│   │   ├── index.html
+│   │   ├── prettify.css
+│   │   ├── prettify.js
+│   │   ├── readex-pro.woff2
+│   │   ├── readex-pro-license.txt
+│   │   ├── sort-arrow-sprite.png
+│   │   ├── sorter.js
+│   │   └── theme.js
+│   ├── src
+│   │   ├── components
+│   │   │   └── .gitkeep
+│   │   ├── layouts
+│   │   │   └── .gitkeep
+│   │   ├── modules
+│   │   │   ├── audit
+│   │   │   ├── auth
+│   │   │   ├── dashboard
+│   │   │   ├── deliveries
+│   │   │   ├── incidents
+│   │   │   ├── kitchen
+│   │   │   ├── menu
+│   │   │   ├── orders
+│   │   │   ├── payments
+│   │   │   ├── reports
+│   │   │   └── users
+│   │   ├── pages
+│   │   │   └── .gitkeep
+│   │   ├── services
+│   │   │   ├── api.test.ts
+│   │   │   └── api.ts
+│   │   ├── test
+│   │   │   ├── example.test.ts
+│   │   │   └── setup.ts
+│   │   ├── types
+│   │   │   └── .gitkeep
+│   │   ├── main.tsx
+│   │   └── styles.css
+│   ├── test-results
+│   │   └── junit.xml
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   └── vite.config.ts
+├── tests
+│   └── .gitkeep
+├── .env
+├── .env.example
+├── .gitignore
+├── azure-pipelines.yml
+├── docker-compose.yml
+├── estructura.txt
+├── package.json
+├── package-lock.json
+├── README.md
+├── sonar-project.properties
+└── swagger.yaml

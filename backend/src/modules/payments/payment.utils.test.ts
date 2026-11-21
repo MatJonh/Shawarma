@@ -25,6 +25,14 @@ describe("calculateBalance", () => {
       .toThrow("El pago supera el total");
   });
 
+  it("debe redondear el saldo a dos decimales", () => {
+    expect(calculateBalance(100.555, 50)).toBe(50.56);
+  });
+
+  it("debe permitir un pago igual a cero con decimales", () => {
+    expect(calculateBalance(150.75, 0)).toBe(150.75);
+  });
+  
   // Ciclo Red-Green-Refactor
     //it("debe calcular el saldo pendiente", () => {
    // expect(calculateBalance(150, 50)).toBe(100);

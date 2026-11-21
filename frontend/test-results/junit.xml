@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="8" failures="0" errors="0" time="0.0086974">
+    <testsuite name="src/services/api.test.ts" timestamp="2026-11-21T03:20:28.439Z" hostname="MATT_INDUSTRIES" tests="6" failures="0" errors="0" skipped="0" time="0.005136">
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; debe configurar correctamente la URL base" time="0.0021367">
+        </testcase>
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; debe agregar el token de autenticación a la petición" time="0.0004406">
+        </testcase>
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; no debe agregar Authorization cuando no existe token" time="0.000212">
+        </testcase>
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; debe devolver el mensaje del servidor" time="0.0001857">
+        </testcase>
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; debe devolver el mensaje del error cuando no existe respuesta" time="0.0001513">
+        </testcase>
+        <testcase classname="src/services/api.test.ts" name="Servicio API - Shawarma &gt; debe devolver un mensaje genérico cuando no existe error" time="0.0001315">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/example.test.ts" timestamp="2026-11-21T03:20:28.441Z" hostname="MATT_INDUSTRIES" tests="2" failures="0" errors="0" skipped="0" time="0.0035614">
+        <testcase classname="src/test/example.test.ts" name="Prueba inicial del frontend Shawarma &gt; debe comprobar que el sistema está funcionando" time="0.0017514">
+        </testcase>
+        <testcase classname="src/test/example.test.ts" name="Prueba inicial del frontend Shawarma &gt; debe comprobar el nombre del restaurante" time="0.0001539">
+        </testcase>
+    </testsuite>
+</testsuites>
