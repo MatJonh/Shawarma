@@ -125,7 +125,7 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Generar cliente Prisma'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
 
       # Aplicar migraciones
 
@@ -133,7 +133,7 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Aplicar migraciones'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
 
       # Ejecutar pruebas unitarias e integración
 
@@ -141,7 +141,7 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Ejecutar pruebas y cobertura'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
 
       # Publicar resultados JUnit
 
@@ -172,4 +172,4 @@ jobs:
         workingDirectory: backend
         displayName: 'Backend - Construir aplicación'
         env:
-          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@postgres:5432/shawarma_test?schema=public'
+          DATABASE_URL: 'postgresql://shawarma_user:shawarma_ci_password@localhost:5432/shawarma_test?schema=public'
