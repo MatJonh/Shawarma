@@ -1,5 +1,5 @@
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { api, errorMessage } from "./api";
 
 describe("Servicio API - Shawarma", () => {
@@ -17,19 +17,33 @@ describe("Servicio API - Shawarma", () => {
   it("debe agregar el token de autenticación a la petición", async () => {
     localStorage.setItem("shawarma_token", "token_prueba");
 
-    const config = await api.interceptors.request
-      .handlers[0].fulfilled({
-        headers: {},
-      } as any);
+    const handler = api.interceptors.request.handlers?.[0];
+
+    expect(handler).toBeDefined();
+
+    if (!handler) {
+      throw new Error("No se encontró el interceptor de petición");
+    }
+
+    const config = await handler.fulfilled({
+      headers: {},
+    } as any);
 
     expect(config.headers.Authorization).toBe("Bearer token_prueba");
   });
 
   it("no debe agregar Authorization cuando no existe token", async () => {
-    const config = await api.interceptors.request
-      .handlers[0].fulfilled({
-        headers: {},
-      } as any);
+    const handler = api.interceptors.request.handlers?.[0];
+
+    expect(handler).toBeDefined();
+
+    if (!handler) {
+      throw new Error("No se encontró el interceptor de petición");
+    }
+
+    const config = await handler.fulfilled({
+      headers: {},
+    } as any);
 
     expect(config.headers.Authorization).toBeUndefined();
   });
